@@ -1,37 +1,75 @@
 import { useEvent } from 'expo';
-import ExpoAppleWallet, { ExpoAppleWalletView } from 'expo-apple-wallet';
-import { Button, SafeAreaView, ScrollView, Text, View } from 'react-native';
+import ExpoAppleWallet from 'expo-apple-wallet';
+import {Button, SafeAreaView, ScrollView, Text, TouchableOpacity, View} from 'react-native';
+import {useEffect, useState} from "react";
 
 export default function App() {
-  const onChangePayload = useEvent(ExpoAppleWallet, 'onChange');
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [process, setProcess] = useState("");
+
+  const panTokenSuffix = "3522"
+  const holder = "DANIEL J C GOLFIERI"
+
+  const initEnrollProcess = () => {
+    console.log(ExpoAppleWallet.initEnrollProcess(panTokenSuffix, holder))
+    setProcess(ExpoAppleWallet.initEnrollProcess(panTokenSuffix, holder))
+  }
+
+  useEffect(() => {
+    console.log(ExpoAppleWallet.isPassKitAvailable())
+    setIsAvailable(ExpoAppleWallet.isPassKitAvailable())
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
-        <Text style={styles.header}>Module API Example</Text>
-        <Group name="Constants">
-          <Text>{ExpoAppleWallet.PI}</Text>
+        <Text style={styles.header}>Expo Apple Wallet Example</Text>
+        <Group name="PassKitAvailable:">
+          { !isAvailable ?
+              (<Text style={{
+                color: "red",
+                fontWeight: "bold"
+              }}>Indisponível</Text>)
+          : null }
+
+          { isAvailable ?
+            (<Text style={{
+              color: "green",
+              fontWeight: "bold"
+            }}>Disponível</Text>)
+            : null }
         </Group>
-        <Group name="Functions">
-          <Text>{ExpoAppleWallet.hello()}</Text>
-        </Group>
-        <Group name="Async functions">
-          <Button
-            title="Set value"
-            onPress={async () => {
-              await ExpoAppleWallet.setValueAsync('Hello from JS!');
-            }}
-          />
-        </Group>
-        <Group name="Events">
-          <Text>{onChangePayload?.value}</Text>
-        </Group>
-        <Group name="Views">
-          <ExpoAppleWalletView
-            url="https://www.example.com"
-            onLoad={({ nativeEvent: { url } }) => console.log(`Loaded: ${url}`)}
-            style={styles.view}
-          />
+
+        <Group name="initEnrollProcess">
+          {isAvailable ? (
+              <>
+                <TouchableOpacity
+                    activeOpacity={0.5}
+                    style={{
+                      borderRadius: 10,
+                      backgroundColor: "#000",
+                      padding: "10"
+                    }}
+                    onPress={initEnrollProcess}
+                >
+                  <Text style={{
+                    color: "#FFF",
+                    textAlign: "center"
+                  }}>Iniciar configuração</Text>
+                </TouchableOpacity>
+
+                <Text style={{
+                  color: "grey",
+                  fontWeight: "bold",
+                  padding: "10"
+                }}>{process}</Text>
+              </>
+          ) : (
+              <Text style={{
+                color: "red",
+                fontWeight: "bold",
+              }}>PassKit Indisponível</Text>
+          )}
         </Group>
       </ScrollView>
     </SafeAreaView>

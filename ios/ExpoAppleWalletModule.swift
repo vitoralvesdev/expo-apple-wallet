@@ -1,48 +1,97 @@
 import ExpoModulesCore
+import PassKit
+
+private struct Card {
+    /// Last four digits of the `pan token` numeration for the card (****-****-****-0000)
+    let panTokenSuffix: String
+    /// Holder for the card
+    let holder: String
+}
+
+/**
+ Define if PassKit will be available for this device
+ */
+private func isPassKitAvailable() -> Bool {
+    return PKAddPaymentPassViewController.canAddPaymentPass()
+}
+
+/**
+ Return the card information that Apple will display into enrollment screen
+ */
+private func cardInformation(panTokenSuffix: String, holder: String) -> Card {
+    return Card(panTokenSuffix: panTokenSuffix, holder: holder)
+}
+
+/**
+ Init enrollment process
+*/
+private class handleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
+    private let configuration: PKAddPaymentPassRequestConfiguration
+
+    init(configuration: PKAddPaymentPassRequestConfiguration) {
+        self.configuration = configuration
+    }
+
+    func addPaymentPassViewController(
+        _ controller: PKAddPaymentPassViewController,
+        generateRequestWithCertificateChain certificates: [Data],
+        nonce: Data, nonceSignature: Data,
+        completionHandler handler: @escaping (PKAddPaymentPassRequest) -> Void) {
+
+        // Perform the bridge from Apple -> Issuer -> Apple
+    }
+
+    func addPaymentPassViewController(
+        _ controller: PKAddPaymentPassViewController,
+        didFinishAdding pass: PKPaymentPass?,
+        error: Error?) {
+
+        // This method will be called when enroll process ends (with success / error)
+    }
+
+    func createEnrollViewController() -> PKAddPaymentPassViewController? {
+        return PKAddPaymentPassViewController(requestConfiguration: configuration, delegate: self)
+    }
+}
 
 public class ExpoAppleWalletModule: Module {
-  // Each module class must implement the definition function. The definition consists of components
-  // that describes the module's functionality and behavior.
-  // See https://docs.expo.dev/modules/module-api for more details about available components.
   public func definition() -> ModuleDefinition {
-    // Sets the name of the module that JavaScript code will use to refer to the module. Takes a string as an argument.
-    // Can be inferred from module's class name, but it's recommended to set it explicitly for clarity.
-    // The module will be accessible from `requireNativeModule('ExpoAppleWallet')` in JavaScript.
     Name("ExpoAppleWallet")
-
-    // Sets constant properties on the module. Can take a dictionary or a closure that returns a dictionary.
-    Constants([
-      "PI": Double.pi
-    ])
 
     // Defines event names that the module can send to JavaScript.
     Events("onChange")
 
-    // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
-    Function("hello") {
-      return "Hello world! 👋"
+    Function("isPassKitAvailable") { () -> Bool in
+        return isPassKitAvailable()
     }
 
-    // Defines a JavaScript function that always returns a Promise and whose native code
-    // is by default dispatched on the different thread than the JavaScript runtime runs on.
-    AsyncFunction("setValueAsync") { (value: String) in
-      // Send an event to JavaScript.
-      self.sendEvent("onChange", [
-        "value": value
-      ])
-    }
+    Function("initEnrollProcess") { (panTokenSuffix: String, holder: String) -> String in
+      let card = cardInformation(panTokenSuffix: panTokenSuffix, holder: holder)
 
-    // Enables the module to be used as a native view. Definition components that are accepted as part of the
-    // view definition: Prop, Events.
-    View(ExpoAppleWalletView.self) {
-      // Defines a setter for the `url` prop.
-      Prop("url") { (view: ExpoAppleWalletView, url: URL) in
-        if view.webView.url != url {
-          view.webView.load(URLRequest(url: url))
-        }
+      guard let configuration = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
+          return "Falha ao criar a configuração do cartão"
       }
 
-      Events("onLoad")
-    }
+      configuration.cardholderName = card.holder
+      configuration.primaryAccountSuffix = card.panTokenSuffix
+      configuration.paymentNetwork = PKPaymentNetwork.visa
+
+      let delegate = handleDelegate(configuration: configuration)
+
+      if !PKAddPaymentPassViewController.canAddPaymentPass() {
+          return "PassKit não está disponível neste dispositivo"
+      }
+
+      guard let enrollViewController = delegate.createEnrollViewController() else {
+          let error = NSError(domain: "ExpoAppleWalletModule", code: 0, userInfo: [
+              NSLocalizedDescriptionKey: "Falha ao criar o controlador de inscrição no InApp \(configuration)",
+              "Configuração": "\(configuration)"
+          ])
+          print("Erro ao criar PKAddPaymentPassViewController:", error)
+          return error.localizedDescription
+      }
+
+      return "Configuração do cartão carregado com sucesso, \(configuration)"
+   }
   }
 }

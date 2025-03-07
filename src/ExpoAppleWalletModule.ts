@@ -1,11 +1,10 @@
 import { NativeModule, requireNativeModule } from 'expo';
 
-import { ExpoAppleWalletModuleEvents } from './ExpoAppleWallet.types';
+// import { ExpoAppleWalletModuleEvents } from './ExpoAppleWallet.types';
 
-declare class ExpoAppleWalletModule extends NativeModule<ExpoAppleWalletModuleEvents> {
-  PI: number;
-  hello(): string;
-  setValueAsync(value: string): Promise<void>;
+declare class ExpoAppleWalletModule extends NativeModule { //<ExpoAppleWalletModuleEvents>
+  isPassKitAvailable(): boolean;
+  initEnrollProcess(panTokenSuffix: string, holder: string): string;
 }
 
 // This call loads the native module object from the JSI.
