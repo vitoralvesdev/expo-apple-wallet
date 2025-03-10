@@ -23,7 +23,7 @@ npm install expo-apple-wallet
 
 ### Configure for Android
 
-
+Not supported
 
 
 ### Configure for iOS
