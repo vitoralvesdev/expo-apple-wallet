@@ -1,6 +1,6 @@
 {
   "name": "expo-apple-wallet",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "My new module",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -21,14 +21,16 @@
     "expo-apple-wallet",
     "ExpoAppleWallet"
   ],
-  "repository": "https://github.com/vitoralvesdev/expo-apple-wallet/expo-apple-wallet",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vitoralvesdev/expo-apple-wallet/expo-apple-wallet"
+  },
   "bugs": {
     "url": "https://github.com/vitoralvesdev/expo-apple-wallet/expo-apple-wallet/issues"
   },
   "author": "Vitor Alves <vitor.hugo@bhut.com.br> (https://github.com/vitoralvesdev/expo-apple-wallet)",
   "license": "MIT",
   "homepage": "https://github.com/vitoralvesdev/expo-apple-wallet/expo-apple-wallet#readme",
-  "dependencies": {},
   "devDependencies": {
     "@types/react": "~18.3.12",
     "expo-module-scripts": "^4.0.3",
@@ -39,5 +41,8 @@
     "expo": "*",
     "react": "*",
     "react-native": "*"
+  },
+  "directories": {
+    "example": "example"
   }
 }
