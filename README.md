@@ -1,7 +1,5 @@
 # expo-apple-wallet (perfect for managed Expo projects)
 
-# API documentation (Still under development)
-
 ### Add the package to your project dependencies
 
 ```

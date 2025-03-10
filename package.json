@@ -1,6 +1,6 @@
 {
   "name": "expo-apple-wallet",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "My new module",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -44,5 +44,8 @@
   },
   "directories": {
     "example": "example"
+  },
+  "ios": {
+    "deploymentTarget": "12.0"
   }
 }
