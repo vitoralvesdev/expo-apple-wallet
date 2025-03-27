@@ -19,5 +19,5 @@ yarn add expo-apple-wallet
 
 ### Configure for Android
 
-Not supported
+(Still under development)
 

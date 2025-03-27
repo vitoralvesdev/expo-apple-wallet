@@ -54,14 +54,11 @@ private class handleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
     }
 }
 
-public class ExpoAppleWalletModule: Module {
+public class ExpoReactNativeWalletModule: Module {
   public func definition() -> ModuleDefinition {
-    Name("ExpoAppleWallet")
+    Name("ExpoReactNativeWallet")
 
-    // Defines event names that the module can send to JavaScript.
-    Events("onChange")
-
-    Function("isPassKitAvailable") { () -> Bool in
+    Function("isAvailable") { () -> Bool in
         return isPassKitAvailable()
     }
 
@@ -83,7 +80,7 @@ public class ExpoAppleWalletModule: Module {
       }
 
       guard let enrollViewController = delegate.createEnrollViewController() else {
-          let error = NSError(domain: "ExpoAppleWalletModule", code: 0, userInfo: [
+          let error = NSError(domain: "ExpoReactNativeWalletModule", code: 0, userInfo: [
               NSLocalizedDescriptionKey: "Falha ao criar o controlador de inscrição no InApp \(configuration)",
               "Configuração": "\(configuration)"
           ])

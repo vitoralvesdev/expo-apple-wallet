@@ -1,5 +1,5 @@
 {
-  "name": "expo-apple-wallet",
+  "name": "expo-react-native-wallet",
   "version": "0.6.0",
   "description": "My new module",
   "main": "build/index.js",
@@ -18,8 +18,8 @@
   "keywords": [
     "react-native",
     "expo",
-    "expo-apple-wallet",
-    "ExpoAppleWallet"
+    "expo-react-native-wallet",
+    "ExpoReactNativeWallet"
   ],
   "repository": {
     "type": "git",

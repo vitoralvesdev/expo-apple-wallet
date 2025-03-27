@@ -6,12 +6,12 @@
   ],
   "apple": {
     "modules": [
-      "ExpoAppleWalletModule"
+      "ExpoReactNativeWalletModule"
     ]
   },
   "android": {
     "modules": [
-      "expo.modules.applewallet.ExpoAppleWalletModule"
+      "expo.modules.reactnativewallet.ExpoReactNativeWalletModule"
     ]
   }
 }

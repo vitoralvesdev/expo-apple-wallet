@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
 
-group = 'expo.modules.applewallet'
+group = 'expo.modules.reactnativewallet'
 version = '0.1.0'
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
@@ -32,7 +32,7 @@ if (useManagedAndroidSdkVersions) {
 }
 
 android {
-  namespace "expo.modules.applewallet"
+  namespace "expo.modules.reactnativewallet"
   defaultConfig {
     versionCode 1
     versionName "0.1.0"
@@ -40,4 +40,8 @@ android {
   lintOptions {
     abortOnError false
   }
+}
+
+dependencies {
+    implementation "com.google.android.gms:play-services-wallet:19.2.0"
 }
