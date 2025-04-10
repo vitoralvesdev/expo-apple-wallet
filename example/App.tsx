@@ -6,24 +6,22 @@ export default function App() {
   const [isAvailable, setIsAvailable] = useState(false);
   const [process, setProcess] = useState("");
 
-  const panTokenSuffix = "3522"
-  const holder = "DANIEL J C GOLFIERI"
+  const panTokenSuffix = "1234"
+  const holder = "YOUR NAME"
 
-  const initWallet = async () => {
+
+  const initEnrollProcess = async () => {
+    console.log(await ExpoAppleWalletModule.initEnrollProcess(panTokenSuffix, holder))
+  }
+
+  const fetchData = async () => {
     const _isAvailable = await ExpoAppleWalletModule.isAvailable()
-
-    console.log("init wallet", _isAvailable)
 
     setIsAvailable(_isAvailable)
   }
 
-  const initEnrollProcess = () => {
-    // console.log(ExpoReactNativeWalletModule.initEnrollProcess(panTokenSuffix, holder))
-    // setProcess(ExpoReactNativeWalletModule.initEnrollProcess(panTokenSuffix, holder))
-  }
-
   useEffect(() => {
-    initWallet().then()
+    fetchData().then()
   }, [])
 
   return (

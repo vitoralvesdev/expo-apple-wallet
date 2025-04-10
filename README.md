@@ -30,3 +30,4 @@ yarn add react-native-expo-apple-wallet
 
 ## Settings in Code
 
+### In development
