@@ -1,7 +1,7 @@
 {
-  "name": "expo-react-native-wallet",
-  "version": "0.6.0",
-  "description": "My new module",
+  "name": "react-native-expo-apple-wallet",
+  "version": "2.0.11",
+  "description": "A module to call apple wallet using Passkit API",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
@@ -19,7 +19,7 @@
     "react-native",
     "expo",
     "expo-react-native-wallet",
-    "ExpoReactNativeWallet"
+    "ExpoAppleWallet"
   ],
   "repository": {
     "type": "git",

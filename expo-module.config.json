@@ -1,17 +1,10 @@
 {
   "platforms": [
-    "apple",
-    "android",
-    "web"
+    "apple"
   ],
   "apple": {
     "modules": [
-      "ExpoReactNativeWalletModule"
-    ]
-  },
-  "android": {
-    "modules": [
-      "expo.modules.reactnativewallet.ExpoReactNativeWalletModule"
+      "ExpoAppleWalletModule"
     ]
   }
 }

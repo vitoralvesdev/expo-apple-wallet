@@ -1,1 +1,1 @@
-export { default } from './ExpoReactNativeWalletModule';
+export { default } from './ExpoAppleWalletModule';

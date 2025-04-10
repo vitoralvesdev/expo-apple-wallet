@@ -1,8 +1,6 @@
-import ExpoReactNativeWalletModule from 'expo-apple-wallet';
-import {SafeAreaView, ScrollView, Text, Platform, TouchableOpacity, View} from 'react-native';
+import ExpoAppleWalletModule from 'expo-apple-wallet';
+import {SafeAreaView, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {useEffect, useState} from "react";
-
-const isIos = Platform.OS === "ios"
 
 export default function App() {
   const [isAvailable, setIsAvailable] = useState(false);
@@ -11,9 +9,12 @@ export default function App() {
   const panTokenSuffix = "3522"
   const holder = "DANIEL J C GOLFIERI"
 
-  const initWallet = () => {
-    console.log("init wallet", ExpoReactNativeWalletModule.isAvailable())
-    setIsAvailable(ExpoReactNativeWalletModule.isAvailable())
+  const initWallet = async () => {
+    const _isAvailable = await ExpoAppleWalletModule.isAvailable()
+
+    console.log("init wallet", _isAvailable)
+
+    setIsAvailable(_isAvailable)
   }
 
   const initEnrollProcess = () => {
@@ -22,86 +23,58 @@ export default function App() {
   }
 
   useEffect(() => {
-    initWallet()
+    initWallet().then()
   }, [])
-
-  const iosLayout = () => {
-    return(
-        <>
-          <Group name="PassKitAvailable:">
-            { !isAvailable ?
-                (<Text style={{
-                  color: "red",
-                  fontWeight: "bold"
-                }}>Indisponível</Text>)
-                : (<Text style={{
-                  color: "green",
-                  fontWeight: "bold"
-                }}>Disponível</Text>)
-            }
-          </Group>
-
-          <Group name="initEnrollProcess">
-            {isAvailable ? (
-                <>
-                  <TouchableOpacity
-                      activeOpacity={0.5}
-                      style={{
-                        borderRadius: 10,
-                        backgroundColor: "#000",
-                        padding: 10
-                      }}
-                      onPress={initEnrollProcess}
-                  >
-                    <Text style={{
-                      color: "#FFF",
-                      textAlign: "center"
-                    }}>Iniciar configuração</Text>
-                  </TouchableOpacity>
-
-                  <Text style={{
-                    color: "grey",
-                    fontWeight: "bold",
-                    padding: 10
-                  }}>{process}</Text>
-                </>
-            ) : (
-                <Text style={{
-                  color: "red",
-                  fontWeight: "bold",
-                }}>PassKit Indisponível</Text>
-            )}
-          </Group>
-        </>
-    )
-  }
-
-  const androidLayout = () => {
-    return(
-        <>
-          <Group name="GoogleWalletAvailable:">
-            { !isAvailable ?
-                (<Text style={{
-                  color: "red",
-                  fontWeight: "bold"
-                }}>Indisponível</Text>)
-                : (<Text style={{
-                  color: "green",
-                  fontWeight: "bold"
-                }}>Disponível</Text>)
-            }
-          </Group>
-        </>
-    )
-  }
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.container}>
         <Text style={styles.header}>Expo Apple Wallet Example</Text>
 
-        {isIos ? iosLayout() : null}
-        {!isIos ? androidLayout() : null}
+        <Group name="PassKitAvailable:">
+          { !isAvailable ?
+              (<Text style={{
+                color: "red",
+                fontWeight: "bold"
+              }}>Indisponível</Text>)
+              : (<Text style={{
+                color: "green",
+                fontWeight: "bold"
+              }}>Disponível</Text>)
+          }
+        </Group>
+
+        <Group name="initEnrollProcess">
+          {isAvailable ? (
+              <>
+                <TouchableOpacity
+                    activeOpacity={0.5}
+                    style={{
+                      borderRadius: 10,
+                      backgroundColor: "#000",
+                      padding: 10
+                    }}
+                    onPress={initEnrollProcess}
+                >
+                  <Text style={{
+                    color: "#FFF",
+                    textAlign: "center"
+                  }}>Iniciar configuração</Text>
+                </TouchableOpacity>
+
+                <Text style={{
+                  color: "grey",
+                  fontWeight: "bold",
+                  padding: 10
+                }}>{process}</Text>
+              </>
+          ) : (
+              <Text style={{
+                color: "red",
+                fontWeight: "bold",
+              }}>PassKit Indisponível</Text>
+          )}
+        </Group>
       </ScrollView>
     </SafeAreaView>
   );

@@ -3,21 +3,30 @@
 ### Add the package to your project dependencies
 
 ```
-npm install expo-apple-wallet
+npm install react-native-expo-apple-wallet
 ```
 
 or
 
 ```
-yarn add expo-apple-wallet
+yarn add react-native-expo-apple-wallet
 ```
 
-### Configure for iOS
+## Settings in Apple panel
+#### 1. You need to send an e-mail to Apple asking for the release of "Additional Capabilities" in the panel. (Enable the option when released)
+![Logo da Minha Empresa](/assets/step1.png)
 
-(Still under development)
+#
+
+#### 2.Create an identifier of type "Merchant IDs".
+![Logo da Minha Empresa](/assets/step2.png)
+
+#
+
+#### 3. Now in the identifier "com.example.app" enable the services: "Apple Pay Payment Processing" and "Wallet"
+![Logo da Minha Empresa](/assets/step3.png)
+![Logo da Minha Empresa](/assets/step4.png)
 
 
-### Configure for Android
-
-(Still under development)
+## Settings in Code
 

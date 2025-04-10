@@ -1,4 +1,5 @@
 import ExpoModulesCore
+import UIKit
 import PassKit
 
 private struct Card {
@@ -27,9 +28,11 @@ private func cardInformation(panTokenSuffix: String, holder: String) -> Card {
 */
 private class handleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
     private let configuration: PKAddPaymentPassRequestConfiguration
+    private weak var module: ExpoAppleWalletModule?
 
-    init(configuration: PKAddPaymentPassRequestConfiguration) {
+    init(configuration: PKAddPaymentPassRequestConfiguration, module: ExpoAppleWalletModule) {
         self.configuration = configuration
+        self.module = module
     }
 
     func addPaymentPassViewController(
@@ -38,7 +41,14 @@ private class handleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         nonce: Data, nonceSignature: Data,
         completionHandler handler: @escaping (PKAddPaymentPassRequest) -> Void) {
 
-        // Perform the bridge from Apple -> Issuer -> Apple
+        // let certificatesBase64 = certificates.map { $0.base64EncodedString() }
+            
+        let eventPayload: [String: Any] = [
+            "nonce": "teste",
+            "nonceSignature": "teste"
+        ]
+        
+        module?.sendEvent("onNonce", eventPayload)
     }
 
     func addPaymentPassViewController(
@@ -46,7 +56,11 @@ private class handleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         didFinishAdding pass: PKPaymentPass?,
         error: Error?) {
 
-        // This method will be called when enroll process ends (with success / error)
+        if let error = error {
+            print("Erro ao adicionar o cartão: \(error.localizedDescription)")
+        } else {
+            print("Cartão adicionado com sucesso!")
+        }
     }
 
     func createEnrollViewController() -> PKAddPaymentPassViewController? {
@@ -54,9 +68,11 @@ private class handleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
     }
 }
 
-public class ExpoReactNativeWalletModule: Module {
+public class ExpoAppleWalletModule: Module {
   public func definition() -> ModuleDefinition {
-    Name("ExpoReactNativeWallet")
+    Name("ExpoAppleWallet")
+      
+    Events("onNonce")
 
     Function("isAvailable") { () -> Bool in
         return isPassKitAvailable()
@@ -73,14 +89,14 @@ public class ExpoReactNativeWalletModule: Module {
       configuration.primaryAccountSuffix = card.panTokenSuffix
       configuration.paymentNetwork = PKPaymentNetwork.visa
 
-      let delegate = handleDelegate(configuration: configuration)
+      let delegate = handleDelegate(configuration: configuration, module: self)
 
       if !PKAddPaymentPassViewController.canAddPaymentPass() {
           return "PassKit não está disponível neste dispositivo"
       }
 
       guard let enrollViewController = delegate.createEnrollViewController() else {
-          let error = NSError(domain: "ExpoReactNativeWalletModule", code: 0, userInfo: [
+          let error = NSError(domain: "ExpoAppleWalletModule", code: 0, userInfo: [
               NSLocalizedDescriptionKey: "Falha ao criar o controlador de inscrição no InApp \(configuration)",
               "Configuração": "\(configuration)"
           ])
@@ -88,7 +104,15 @@ public class ExpoReactNativeWalletModule: Module {
           return error.localizedDescription
       }
 
-      return "Configuração do cartão carregado com sucesso, \(configuration)"
+      guard let currentVC = appContext?.utilities?.currentViewController() else {
+          return "Não foi possível obter o controlador de visualização atual"
+      }
+        
+      DispatchQueue.main.async {
+          currentVC.present(enrollViewController, animated: true, completion: nil)
+      }
+
+      return "Processo de inscrição iniciado"
    }
   }
 }
