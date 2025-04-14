@@ -1,21 +1,21 @@
-import { NativeModule, requireNativeModule } from 'expo';
+import { requireNativeModule, EventEmitter } from 'expo-modules-core';
 
 type NonceChangeEvent = {
   nonce: string;
-  nonceSignature: string
+  nonceSignature: string;
 };
 
-type NonceModuleEvents = {
-  onNonce(event: NonceChangeEvent[]): void;
+type ExpoAppleWalletEvents = {
+  onNonce: (event: NonceChangeEvent) => void;
 };
 
-declare class ExpoAppleWalletModule extends NativeModule<NonceModuleEvents> {
-  isAvailable(): Promise<boolean>;
-  initEnrollProcess(panTokenSuffix: string, holder: string): Promise<string>;
+
+const ExpoAppleWalletModule = requireNativeModule('ExpoAppleWallet');
+
+const emitter = new EventEmitter<ExpoAppleWalletEvents>(ExpoAppleWalletModule);
+
+export function addNonceListener(callback: (event: NonceChangeEvent) => void) {
+  return emitter.addListener('onNonce', callback);
 }
 
-const module = requireNativeModule<ExpoAppleWalletModule>('ExpoAppleWallet');
-
-module.addListener('onNonce', (event: NonceChangeEvent[]) => {});
-
-export default module;
+export default ExpoAppleWalletModule;

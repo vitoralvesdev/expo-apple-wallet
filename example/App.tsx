@@ -1,6 +1,6 @@
-import ExpoAppleWalletModule from 'expo-apple-wallet';
 import {SafeAreaView, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {useEffect, useState} from "react";
+import ExpoAppleWalletModule, {addNonceListener} from 'expo-apple-wallet';
 
 export default function App() {
   const [isAvailable, setIsAvailable] = useState(false);
@@ -22,6 +22,14 @@ export default function App() {
 
   useEffect(() => {
     fetchData().then()
+  }, [])
+
+  useEffect(() => {
+    const subscription = addNonceListener((event) => {
+      console.log("Nonce recebido:", event)
+    });
+
+    return () => subscription.remove()
   }, [])
 
   return (
