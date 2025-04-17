@@ -7,6 +7,12 @@ private struct Card {
     let holder: String
 }
 
+private struct NonceResult {
+    let nonce: String
+    let nonceSignature: String
+    let certificates: [String]
+}
+
 private func isPassKitAvailable() -> Bool {
     return PKAddPaymentPassViewController.canAddPaymentPass()
 }
@@ -19,11 +25,13 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
     private let configuration: PKAddPaymentPassRequestConfiguration
     private unowned let module: ExpoAppleWalletModule
     private var completionHandler: ((PKAddPaymentPassRequest) -> Void)?
+    private var nonceContinuation: CheckedContinuation<NonceResult, Error>?
 
     init(configuration: PKAddPaymentPassRequestConfiguration, module: ExpoAppleWalletModule) {
         self.configuration = configuration
         self.module = module
     }
+
 
     func addPaymentPassViewController(
         _ controller: PKAddPaymentPassViewController,
@@ -35,11 +43,18 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
 
         let nonceBase64 = nonce.base64EncodedString()
         let nonceSignatureBase64 = nonceSignature.base64EncodedString()
+        let certificatesBase64 = certificates.map { $0.base64EncodedString() }
 
-        module.sendEvent("onNonce", [
-            "nonce": nonceBase64,
-            "nonceSignature": nonceSignatureBase64
-        ])
+        if let continuation = self.nonceContinuation {
+            continuation.resume(returning: NonceResult(
+                nonce: nonceBase64,
+                nonceSignature: nonceSignatureBase64,
+                certificates: certificatesBase64
+            ))
+            self.nonceContinuation = nil
+        } else {
+            print("Nenhuma continuation esperando pelo nonce")
+        }
     }
 
     func addPaymentPassViewController(
@@ -82,6 +97,12 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
 
         self.completionHandler = nil
     }
+
+    func waitForNonce() async throws -> NonceResult {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.nonceContinuation = continuation
+        }
+    }
 }
 
 public class ExpoAppleWalletModule: Module {
@@ -96,11 +117,11 @@ public class ExpoAppleWalletModule: Module {
             return isPassKitAvailable()
         }
 
-        Function("initEnrollProcess") { (panTokenSuffix: String, holder: String) -> String in
+        AsyncFunction("initEnrollProcess") { (panTokenSuffix: String, holder: String) async throws -> [String: String] in
             let card = cardInformation(panTokenSuffix: panTokenSuffix, holder: holder)
 
             guard let configuration = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
-                return "Falha ao criar a configuração do cartão"
+                throw NSError(domain: "Configuração inválida", code: 0)
             }
 
             configuration.cardholderName = card.holder
@@ -108,26 +129,31 @@ public class ExpoAppleWalletModule: Module {
             configuration.paymentNetwork = PKPaymentNetwork.visa
 
             let delegate = HandleDelegate(configuration: configuration, module: self)
-
             self.activeDelegate = delegate
 
-            if !PKAddPaymentPassViewController.canAddPaymentPass() {
-                return "PassKit não está disponível neste dispositivo"
+            if await !PKAddPaymentPassViewController.canAddPaymentPass() {
+                throw NSError(domain: "PassKit indisponível", code: 0)
             }
 
             guard let enrollViewController = delegate.createEnrollViewController() else {
-                return "Falha ao criar o controlador de inscrição no InApp"
+                throw NSError(domain: "Erro ao criar controlador", code: 0)
             }
 
             guard let currentVC = appContext?.utilities?.currentViewController() else {
-                return "Não foi possível obter o controlador de visualização atual"
+                throw NSError(domain: "Sem controlador atual", code: 0)
             }
 
             DispatchQueue.main.async {
                 currentVC.present(enrollViewController, animated: true, completion: nil)
             }
 
-            return "Processo de inscrição iniciado"
+            let result = try await delegate.waitForNonce()
+
+            return [
+                "nonce": result.nonce,
+                "nonceSignature": result.nonceSignature,
+                "certificates": result.certificates.joined(separator: ",")
+            ]
         }
 
         Function("completeEnrollment") {
@@ -136,6 +162,8 @@ public class ExpoAppleWalletModule: Module {
                 ephemeralPublicKeyBase64: String,
                 encryptedPassDataBase64: String
             ) in
+
+            print("continue completeEnrollment")
 
             guard let delegate = self.activeDelegate else {
                 print("Delegate não encontrado")

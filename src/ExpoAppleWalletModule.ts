@@ -3,6 +3,7 @@ import { requireNativeModule, EventEmitter } from 'expo-modules-core';
 type NonceChangeEvent = {
   nonce: string;
   nonceSignature: string;
+  certificates: string[];
 };
 
 type ExpoAppleWalletEvents = {

@@ -3,33 +3,44 @@ import {useEffect, useState} from "react";
 import ExpoAppleWalletModule, {addNonceListener} from 'expo-apple-wallet';
 
 export default function App() {
-  const [isAvailable, setIsAvailable] = useState(false);
-  const [process, setProcess] = useState("");
+  const [isAvailable, setIsAvailable] = useState(false)
 
   const panTokenSuffix = "1234"
   const holder = "YOUR NAME"
 
 
   const initEnrollProcess = async () => {
-    console.log(await ExpoAppleWalletModule.initEnrollProcess(panTokenSuffix, holder))
+    const response = await ExpoAppleWalletModule.initEnrollProcess(panTokenSuffix, holder)
+
+    if (response) {
+      const { nonce, nonceSignature, certificates } = response
+
+      console.log(nonce, nonceSignature, certificates)
+
+      // call your back-end
+
+      const activationData = "param1"
+      const encryptedPassData = "param2"
+      const ephemeralPublicKey = "param3"
+
+      await completeEnrollProcess(activationData, encryptedPassData, ephemeralPublicKey)
+    }
+  }
+
+  const completeEnrollProcess = async (activationData: string, encryptedPassData: string, ephemeralPublicKey: string) => {
+    await ExpoAppleWalletModule.completeEnrollment(
+        activationData,
+        encryptedPassData,
+        ephemeralPublicKey,
+    )
   }
 
   const fetchData = async () => {
-    const _isAvailable = await ExpoAppleWalletModule.isAvailable()
-
-    setIsAvailable(_isAvailable)
+    setIsAvailable(await ExpoAppleWalletModule.isAvailable())
   }
 
   useEffect(() => {
     fetchData().then()
-  }, [])
-
-  useEffect(() => {
-    const subscription = addNonceListener((event) => {
-      console.log("Nonce recebido:", event)
-    });
-
-    return () => subscription.remove()
   }, [])
 
   return (
@@ -65,14 +76,8 @@ export default function App() {
                   <Text style={{
                     color: "#FFF",
                     textAlign: "center"
-                  }}>Iniciar configuração</Text>
+                  }}>Abrir Apple Wallet</Text>
                 </TouchableOpacity>
-
-                <Text style={{
-                  color: "grey",
-                  fontWeight: "bold",
-                  padding: 10
-                }}>{process}</Text>
               </>
           ) : (
               <Text style={{
