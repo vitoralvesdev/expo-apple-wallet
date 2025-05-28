@@ -32,7 +32,6 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         self.module = module
     }
 
-
     func addPaymentPassViewController(
         _ controller: PKAddPaymentPassViewController,
         generateRequestWithCertificateChain certificates: [Data],
@@ -105,13 +104,27 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
     }
 }
 
+// public class AppleWalletAppDelegateSubscriber: ExpoAppDelegateSubscriber {
+//     private var pendingRequest: PKAddPaymentPassRequest?
+//     private var completionHandler: ((PKAddPaymentPassRequest) -> Void)?
+//
+//     public func application(
+//         _ application: UIApplication,
+//         didReceiveAddPaymentPass request: PKAddPaymentPassRequest,
+//         completionHandler handler: @escaping (PKAddPaymentPassRequest) -> Void
+//     ) {
+//         self.pendingRequest = request;
+//         self.completionHandler = handler;
+//
+//         print("🔔 Recebido App-to-App provisioning request")
+//     }
+// }
+
 public class ExpoAppleWalletModule: Module {
     private var activeDelegate: HandleDelegate?
 
     public func definition() -> ModuleDefinition {
         Name("ExpoAppleWallet")
-
-        Events("onNonce")
 
         Function("isAvailable") { () -> Bool in
             return isPassKitAvailable()
@@ -162,8 +175,6 @@ public class ExpoAppleWalletModule: Module {
                 ephemeralPublicKeyBase64: String,
                 encryptedPassDataBase64: String
             ) in
-
-            print("continue completeEnrollment")
 
             guard let delegate = self.activeDelegate else {
                 print("Delegate não encontrado")

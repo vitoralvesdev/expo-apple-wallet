@@ -1,6 +1,6 @@
 import {SafeAreaView, ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {useEffect, useState} from "react";
-import ExpoAppleWalletModule, {addNonceListener} from 'expo-apple-wallet';
+import ExpoAppleWalletModule from 'expo-apple-wallet';
 
 export default function App() {
   const [isAvailable, setIsAvailable] = useState(false)
@@ -8,12 +8,15 @@ export default function App() {
   const panTokenSuffix = "1234"
   const holder = "YOUR NAME"
 
+  const init = async () => {
+    setIsAvailable(await ExpoAppleWalletModule.isAvailable())
+  }
 
-  const initEnrollProcess = async () => {
+  const call = async () => {
     const response = await ExpoAppleWalletModule.initEnrollProcess(panTokenSuffix, holder)
 
     if (response) {
-      const { nonce, nonceSignature, certificates } = response
+      const {nonce, nonceSignature, certificates} = response
 
       console.log(nonce, nonceSignature, certificates)
 
@@ -23,24 +26,16 @@ export default function App() {
       const encryptedPassData = "param2"
       const ephemeralPublicKey = "param3"
 
-      await completeEnrollProcess(activationData, encryptedPassData, ephemeralPublicKey)
+      await ExpoAppleWalletModule.completeEnrollment(
+          activationData,
+          encryptedPassData,
+          ephemeralPublicKey,
+      )
     }
   }
 
-  const completeEnrollProcess = async (activationData: string, encryptedPassData: string, ephemeralPublicKey: string) => {
-    await ExpoAppleWalletModule.completeEnrollment(
-        activationData,
-        encryptedPassData,
-        ephemeralPublicKey,
-    )
-  }
-
-  const fetchData = async () => {
-    setIsAvailable(await ExpoAppleWalletModule.isAvailable())
-  }
-
   useEffect(() => {
-    fetchData().then()
+    init().then()
   }, [])
 
   return (
@@ -71,12 +66,12 @@ export default function App() {
                       backgroundColor: "#000",
                       padding: 10
                     }}
-                    onPress={initEnrollProcess}
+                    onPress={call}
                 >
                   <Text style={{
                     color: "#FFF",
                     textAlign: "center"
-                  }}>Abrir Apple Wallet</Text>
+                  }}>Adicionar ao Apple Wallet</Text>
                 </TouchableOpacity>
               </>
           ) : (
