@@ -1,1 +1,1 @@
-export { default, addNonceListener } from './ExpoAppleWalletModule';
+export { default, addAppToAppListener } from './ExpoAppleWalletModule';

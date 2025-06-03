@@ -44,6 +44,8 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         let nonceSignatureBase64 = nonceSignature.base64EncodedString()
         let certificatesBase64 = certificates.map { $0.base64EncodedString() }
 
+        module.sendEvent("appToApp", ["nonce": "", "nonceSignature": ""])
+
         if let continuation = self.nonceContinuation {
             continuation.resume(returning: NonceResult(
                 nonce: nonceBase64,
@@ -125,6 +127,8 @@ public class ExpoAppleWalletModule: Module {
 
     public func definition() -> ModuleDefinition {
         Name("ExpoAppleWallet")
+
+        Events("appToApp")
 
         Function("isAvailable") { () -> Bool in
             return isPassKitAvailable()
