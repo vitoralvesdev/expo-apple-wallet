@@ -44,7 +44,7 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         let nonceSignatureBase64 = nonceSignature.base64EncodedString()
         let certificatesBase64 = certificates.map { $0.base64EncodedString() }
 
-        module.sendEvent("appToApp", ["nonce": "", "nonceSignature": ""])
+        module.sendEvent("appToApp", ["nonce": nonceBase64])
 
         if let continuation = self.nonceContinuation {
             continuation.resume(returning: NonceResult(
@@ -105,22 +105,6 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         }
     }
 }
-
-// public class AppleWalletAppDelegateSubscriber: ExpoAppDelegateSubscriber {
-//     private var pendingRequest: PKAddPaymentPassRequest?
-//     private var completionHandler: ((PKAddPaymentPassRequest) -> Void)?
-//
-//     public func application(
-//         _ application: UIApplication,
-//         didReceiveAddPaymentPass request: PKAddPaymentPassRequest,
-//         completionHandler handler: @escaping (PKAddPaymentPassRequest) -> Void
-//     ) {
-//         self.pendingRequest = request;
-//         self.completionHandler = handler;
-//
-//         print("🔔 Recebido App-to-App provisioning request")
-//     }
-// }
 
 public class ExpoAppleWalletModule: Module {
     private var activeDelegate: HandleDelegate?
