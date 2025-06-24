@@ -12,22 +12,24 @@ or
 yarn add react-native-expo-apple-wallet
 ```
 
-## Settings in Apple panel
-#### 1. You need to send an e-mail to Apple asking for the release of "Additional Capabilities" in the panel. (Enable the option when released)
-![Logo da Minha Empresa](/assets/step1.png)
 
-#
+## 1. Settings in Apple Developer panel
+#### Within your identifier settings
 
-#### 2.Create an identifier of type "Merchant IDs".
-![Logo da Minha Empresa](/assets/step2.png)
+### Add capabilities
 
-#
+![Logo da Minha Empresa](/assets/wallet.png)
+![Logo da Minha Empresa](/assets/provisioning.png)
+####  1.1 You need to send an e-mail to Apple asking for the release of capability "In-App Provisioning" in the panel.
+####  1.2 Create a profile of type "App Store Provisioning Profile"
 
-#### 3. Now in the identifier "com.example.app" enable the services: "Apple Pay Payment Processing" and "Wallet"
-![Logo da Minha Empresa](/assets/step3.png)
-![Logo da Minha Empresa](/assets/step4.png)
+## 2. Adding capabilities in the project
+#### In your app.config.js file add this entitlements configs
 
-
-## Settings in Code
-
-### In development
+````
+ios: {
+    entitlements: {
+        "com.apple.developer.payment-pass-provisioning": true,
+        "com.apple.developer.pass-type-identifiers": ["$(TeamIdentifierPrefix)*"],
+      },
+},

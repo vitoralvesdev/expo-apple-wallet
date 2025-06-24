@@ -44,8 +44,6 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         let nonceSignatureBase64 = nonceSignature.base64EncodedString()
         let certificatesBase64 = certificates.map { $0.base64EncodedString() }
 
-        module.sendEvent("appToApp", ["nonce": nonceBase64])
-
         if let continuation = self.nonceContinuation {
             continuation.resume(returning: NonceResult(
                 nonce: nonceBase64,
@@ -64,7 +62,7 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
         error: Error?
     ) {
         if let error = error {
-            print("Erro ao adicionar o cartão: \(error.localizedDescription)")
+            print("Erro ao adicionar cartão: \(error.localizedDescription)")
         } else {
             print("Cartão adicionado com sucesso!")
         }
@@ -119,6 +117,28 @@ public class ExpoAppleWalletModule: Module {
         }
 
         AsyncFunction("initEnrollProcess") { (panTokenSuffix: String, holder: String) async throws -> [String: String] in
+            if let existingDelegate = self.activeDelegate {
+                guard let currentVC = appContext?.utilities?.currentViewController() else {
+                    throw NSError(domain: "Sem controlador atual", code: 0)
+                }
+
+                if await currentVC.presentedViewController == nil {
+                    if let enrollViewController = existingDelegate.createEnrollViewController() {
+                        DispatchQueue.main.async {
+                            currentVC.present(enrollViewController, animated: true, completion: nil)
+                        }
+                    }
+                }
+
+                let result = try await existingDelegate.waitForNonce()
+
+                return [
+                    "nonce": result.nonce,
+                    "nonceSignature": result.nonceSignature,
+                    "certificates": result.certificates.joined(separator: ",")
+                ]
+            }
+
             let card = cardInformation(panTokenSuffix: panTokenSuffix, holder: holder)
 
             guard let configuration = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {
