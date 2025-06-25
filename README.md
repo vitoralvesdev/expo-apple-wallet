@@ -33,3 +33,44 @@ ios: {
         "com.apple.developer.pass-type-identifiers": ["$(TeamIdentifierPrefix)*"],
       },
 },
+
+````
+
+## 3. Usage
+
+#### Checking if Passkit is available
+````
+const init = async () => {
+    setIsAvailable(await ExpoAppleWalletModule.isAvailable())
+}
+
+useEffect(() => {
+    init().then()
+  }, [])
+````
+
+
+#### Call to add card
+````
+const addCard = async () => {
+    const response = await ExpoAppleWalletModule.initEnrollProcess(panTokenSuffix, holder)
+
+    if (response) {
+      const {nonce, nonceSignature, certificates} = response
+
+      console.log(nonce, nonceSignature, certificates)
+
+      // call your back-end
+
+      const activationData = "param1"
+      const encryptedPassData = "param2"
+      const ephemeralPublicKey = "param3"
+
+      await ExpoAppleWalletModule.completeEnrollment(
+          activationData,
+          encryptedPassData,
+          ephemeralPublicKey,
+      )
+    }
+}
+````
