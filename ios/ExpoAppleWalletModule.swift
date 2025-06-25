@@ -116,7 +116,7 @@ public class ExpoAppleWalletModule: Module {
             return isPassKitAvailable()
         }
 
-        Function("isCardAlreadyAdded") { (panTokenSuffix: String) -> Bool in
+        AsyncFunction("isCardAlreadyAdded") { (panTokenSuffix: String) -> Bool in
             let passLibrary = PKPassLibrary()
             let passes = passLibrary.passes()
 
