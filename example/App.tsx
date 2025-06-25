@@ -4,12 +4,17 @@ import ExpoAppleWalletModule from 'expo-apple-wallet';
 
 export default function App() {
   const [isAvailable, setIsAvailable] = useState(false)
+  const [isAlready, setIsAlready] = useState(false)
 
   const panTokenSuffix = "1234"
   const holder = "YOUR NAME"
 
   const init = async () => {
     setIsAvailable(await ExpoAppleWalletModule.isAvailable())
+  }
+
+  const isCardAlreadyAdded = async (panTokenSuffix: string) => {
+    setIsAlready(await ExpoAppleWalletModule.isCardAlreadyAdded(panTokenSuffix))
   }
 
   const call = async () => {
@@ -36,6 +41,7 @@ export default function App() {
 
   useEffect(() => {
     init().then()
+    isCardAlreadyAdded(panTokenSuffix).then()
   }, [])
 
   return (
@@ -43,7 +49,7 @@ export default function App() {
       <ScrollView style={styles.container}>
         <Text style={styles.header}>Expo Apple Wallet Example</Text>
 
-        <Group name="PassKitAvailable:">
+        <Group name="isAvailable:">
           { !isAvailable ?
               (<Text style={{
                 color: "red",
@@ -56,7 +62,20 @@ export default function App() {
           }
         </Group>
 
-        <Group name="initEnrollProcess">
+        <Group name="isCardAlreadyAdded:">
+          { !isAlready ?
+              (<Text style={{
+                color: "red",
+                fontWeight: "bold"
+              }}>Cartão já foi adicionado</Text>)
+              : (<Text style={{
+                color: "green",
+                fontWeight: "bold"
+              }}>Disponível</Text>)
+          }
+        </Group>
+
+        <Group name="isCard">
           {isAvailable ? (
               <>
                 <TouchableOpacity
@@ -71,7 +90,7 @@ export default function App() {
                   <Text style={{
                     color: "#FFF",
                     textAlign: "center"
-                  }}>Adicionar ao Apple Wallet</Text>
+                  }}>Adicionar cartão na Apple Wallet</Text>
                 </TouchableOpacity>
               </>
           ) : (

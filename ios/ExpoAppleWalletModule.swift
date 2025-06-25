@@ -116,29 +116,22 @@ public class ExpoAppleWalletModule: Module {
             return isPassKitAvailable()
         }
 
-        AsyncFunction("initEnrollProcess") { (panTokenSuffix: String, holder: String) async throws -> [String: String] in
-            if let existingDelegate = self.activeDelegate {
-                guard let currentVC = appContext?.utilities?.currentViewController() else {
-                    throw NSError(domain: "Sem controlador atual", code: 0)
-                }
+        Function("isCardAlreadyAdded") { (panTokenSuffix: String) -> Bool in
+            let passLibrary = PKPassLibrary()
+            let passes = passLibrary.passes()
 
-                if await currentVC.presentedViewController == nil {
-                    if let enrollViewController = existingDelegate.createEnrollViewController() {
-                        DispatchQueue.main.async {
-                            currentVC.present(enrollViewController, animated: true, completion: nil)
-                        }
+            for pass in passes {
+                if let paymentPass = pass as? PKPaymentPass {
+                    if paymentPass.primaryAccountNumberSuffix == panTokenSuffix {
+                        return true
                     }
                 }
-
-                let result = try await existingDelegate.waitForNonce()
-
-                return [
-                    "nonce": result.nonce,
-                    "nonceSignature": result.nonceSignature,
-                    "certificates": result.certificates.joined(separator: ",")
-                ]
             }
 
+            return false
+        }
+
+        AsyncFunction("initEnrollProcess") { (panTokenSuffix: String, holder: String) async throws -> [String: String] in
             let card = cardInformation(panTokenSuffix: panTokenSuffix, holder: holder)
 
             guard let configuration = PKAddPaymentPassRequestConfiguration(encryptionScheme: .ECC_V2) else {

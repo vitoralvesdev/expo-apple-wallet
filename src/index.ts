@@ -1,1 +1,1 @@
-export { default } from './ExpoAppleWalletModule'; //addAppToAppListener
+export { default } from './ExpoAppleWalletModule';
