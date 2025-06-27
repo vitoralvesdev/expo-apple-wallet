@@ -1,10 +1,14 @@
 {
-  "platforms": [
-    "apple"
-  ],
+  "name": "react-native-expo-apple-wallet",
+  "platforms": ["android", "ios"],
   "apple": {
     "modules": [
       "ExpoAppleWalletModule"
+    ]
+  },
+  "android": {
+    "modules": [
+      "expo.modules.applewallet.ExpoAppleWalletModule"
     ]
   }
 }
