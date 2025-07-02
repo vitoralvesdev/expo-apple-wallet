@@ -4,6 +4,9 @@
   "apple": {
     "modules": [
       "ExpoAppleWalletModule"
+    ],
+    "appDelegateSubscribers": [
+      "AppleWalletAppDelegateSubscriber"
     ]
   },
   "android": {

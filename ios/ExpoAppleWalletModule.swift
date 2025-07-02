@@ -7,7 +7,7 @@ private struct Card {
     let holder: String
 }
 
-private struct NonceResult {
+struct NonceResult {
     let nonce: String
     let nonceSignature: String
     let certificates: [String]
@@ -21,7 +21,7 @@ private func cardInformation(panTokenSuffix: String, holder: String) -> Card {
     return Card(panTokenSuffix: panTokenSuffix, holder: holder)
 }
 
-private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
+class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
     private let configuration: PKAddPaymentPassRequestConfiguration
     private unowned let module: ExpoAppleWalletModule
     private var completionHandler: ((PKAddPaymentPassRequest) -> Void)?
@@ -105,12 +105,11 @@ private class HandleDelegate: NSObject, PKAddPaymentPassViewControllerDelegate {
 }
 
 public class ExpoAppleWalletModule: Module {
-    private var activeDelegate: HandleDelegate?
+    static var shared: ExpoAppleWalletModule?
+    var activeDelegate: HandleDelegate?
 
     public func definition() -> ModuleDefinition {
         Name("ExpoAppleWallet")
-
-        Events("appToApp")
 
         Function("isAvailable") { () -> Bool in
             return isPassKitAvailable()
@@ -196,4 +195,32 @@ public class ExpoAppleWalletModule: Module {
             )
         }
     }
+}
+
+public class AppleWalletAppDelegateSubscriber: ExpoAppDelegateSubscriber {
+    private var pendingRequest: PKAddPaymentPassRequest?
+    private var completionHandler: ((PKAddPaymentPassRequest) -> Void)?
+
+    public func application(
+         _ application: UIApplication,
+         didReceiveAddPaymentPass request: PKAddPaymentPassRequest,
+         completionHandler handler: @escaping (PKAddPaymentPassRequest) -> Void
+     ) {
+         self.completionHandler = handler
+
+         let encryptedPassData = request.encryptedPassData ?? Data()
+         let activationData = request.activationData ?? Data()
+         let ephemeralPublicKey = request.ephemeralPublicKey ?? Data()
+
+         guard let delegate = ExpoAppleWalletModule.shared?.activeDelegate else {
+             print("Delegate não encontrado")
+             return
+         }
+
+         delegate.continueEnrollment(
+             activationData: activationData,
+             ephemeralPublicKey: ephemeralPublicKey,
+             encryptedPassData: encryptedPassData
+         )
+     }
 }
