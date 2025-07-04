@@ -194,33 +194,9 @@ public class ExpoAppleWalletModule: Module {
                 encryptedPassData: encryptedPassData
             )
         }
+
+        Function("app2App") { // Passar parametros do deep-link para verificar se pass(cartao) existe na wallet
+
+        }
     }
-}
-
-public class AppleWalletAppDelegateSubscriber: ExpoAppDelegateSubscriber {
-    private var pendingRequest: PKAddPaymentPassRequest?
-    private var completionHandler: ((PKAddPaymentPassRequest) -> Void)?
-
-    public func application(
-         _ application: UIApplication,
-         didReceiveAddPaymentPass request: PKAddPaymentPassRequest,
-         completionHandler handler: @escaping (PKAddPaymentPassRequest) -> Void
-     ) {
-         self.completionHandler = handler
-
-         let encryptedPassData = request.encryptedPassData ?? Data()
-         let activationData = request.activationData ?? Data()
-         let ephemeralPublicKey = request.ephemeralPublicKey ?? Data()
-
-         guard let delegate = ExpoAppleWalletModule.shared?.activeDelegate else {
-             print("Delegate não encontrado")
-             return
-         }
-
-         delegate.continueEnrollment(
-             activationData: activationData,
-             ephemeralPublicKey: ephemeralPublicKey,
-             encryptedPassData: encryptedPassData
-         )
-     }
 }
