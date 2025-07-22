@@ -195,8 +195,8 @@ public class ExpoAppleWalletModule: Module {
             )
         }
 
-        Function("app2App") { // Passar parametros do deep-link para verificar se pass(cartao) existe na wallet
-
+        Function("inAppVerification") { (serialNumber: String, passTypeIdentifier: String, action: String) in
+            print("inAppVerification: \(serialNumber) \(passTypeIdentifier) \(action)")
         }
     }
 }
