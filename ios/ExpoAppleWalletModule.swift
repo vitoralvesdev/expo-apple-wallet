@@ -195,8 +195,40 @@ public class ExpoAppleWalletModule: Module {
             )
         }
 
-        Function("inAppVerification") { (serialNumber: String, passTypeIdentifier: String, action: String) in
+        AsyncFunction("inAppVerification") { (serialNumber: String, passTypeIdentifier: String, action: String) in
             print("inAppVerification: \(serialNumber) \(passTypeIdentifier) \(action)")
+
+            let passLibrary = PKPassLibrary()
+
+            var foundPass: PKSecureElementPass? = passLibrary.pass(withPassTypeIdentifier: passTypeIdentifier, serialNumber: serialNumber) as? PKSecureElementPass
+
+            if foundPass == nil {
+                let remotePasses = PKPassLibrary().remoteSecureElementPasses
+                foundPass = remotePasses.first(where: {
+                    $0.passTypeIdentifier == passTypeIdentifier && $0.serialNumber == serialNumber
+                })
+            }
+
+            guard let securePass = foundPass else {
+                throw NSError(domain: "Cartão não encontrado no dispositivo", code: 404)
+            }
+
+            guard securePass.passActivationState == .requiresActivation else {
+                throw NSError(domain: "Cartão em estado inválido para ativação", code: 400)
+            }
+
+            var result: [String: String] = [
+                "deviceAccountNumberSuffix": securePass.deviceAccountNumberSuffix,
+                "primaryAccountIdentifier": securePass.primaryAccountIdentifier,
+                "activationState": "requiresActivation",
+                "serialNumber": securePass.serialNumber,
+                "passTypeIdentifier": securePass.passTypeIdentifier
+            ]
+
+            let deviceName = UIDevice.current.name
+            result["deviceName"] = deviceName
+
+            return result
         }
     }
 }
