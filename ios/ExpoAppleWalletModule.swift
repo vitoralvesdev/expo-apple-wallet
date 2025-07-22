@@ -210,11 +210,17 @@ public class ExpoAppleWalletModule: Module {
             }
 
             guard let securePass = foundPass else {
-                throw NSError(domain: "Cartão não encontrado no dispositivo", code: 404)
+                return [
+                    "error": "CARD_NOT_FOUND",
+                    "message": "Cartão não encontrado no dispositivo"
+                ]
             }
 
             guard securePass.passActivationState == .requiresActivation else {
-                throw NSError(domain: "Cartão em estado inválido para ativação", code: 400)
+                return [
+                    "error": "INVALID_CARD_STATE",
+                    "message": "Cartão em estado inválido para ativação"
+                ]
             }
 
             var result: [String: String] = [
